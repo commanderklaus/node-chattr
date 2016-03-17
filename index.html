@@ -1,0 +1,54 @@
+<form id="chat_form">
+	<label>
+		<input type="text" id="chat_input" />
+	<label>
+		<input type="submit" value="send" />
+</form>
+
+<div style="width: 100px; height: 100px; border: 1px solid #ccc" id="chat_window">
+</div>
+
+<div id="status"></div>
+
+<script src="https://code.jquery.com/jquery-2.2.1.js" integrity="sha256-eNcUzO3jsv0XlJLveFEkbB8bA7/CroNpNVk3XpmnwHc=" crossorigin="anonymous"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	function insertMessage (data) {
+		$('#chat_window').append('<p>' + data + '</p>');
+	}
+
+	function clearMessage() {
+		$("#chat_input").val('');
+	}
+
+	var socket = io.connect('http://localhost:8080');
+
+	socket.on('messages', function (data) {
+		console.log(data);
+		insertMessage(data); // insert message into chat window in browser
+		clearMessage();
+	});
+
+	socket.on('connect', function (data) {
+		$('#status').html('Connected to chattr');
+		nickname = prompt("what is your nickname?");
+		socket.emit('join', nickname);
+	});
+
+	socket.on('add chatter', function (name){
+		var chatter = $('<li>' + name + '</li>').data('name', name);
+		$('#chatters').append(chatter);
+	});
+
+	server.on('remove chatter', function (name) {
+		$('#chatters li[data-name=' + name + ']').remove();
+	})
+
+	$('#chat_form').submit(function (e) {
+		e.preventDefault();
+		var msg = $('#chat_input').val();
+
+		socket.emit('messages', msg);
+	});
+
+</script>
